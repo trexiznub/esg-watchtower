@@ -22,16 +22,17 @@ export function InsightCard({ i, withWhy }: { i: Insight; withWhy?: boolean }) {
 export default function Risk() {
   const { db, open } = useStore();
   const [cid, setCid] = useState('');
+  const [more, setMore] = useState(false);
   const cos = cid ? db.cos.filter(c => c.id === cid) : db.cos;
   const all = cos.flatMap(c => insights(db, c.id)), cmp = comparative(db);
   return (
     <>
-      <PageHead title="ESG Risk Analysis" sub="Patterns found across multiple reports. Each conclusion shows the rule and the evidence behind it."><Select id="rc" value={cid} onChange={setCid} options={db.cos.map(c => [c.id, c.name] as [string, string])} all="All companies" /></PageHead>
+      <PageHead title="ESG Risk Analysis" sub="What the reports add up to. Every signal shows the rule and evidence behind it."><Select id="rc" value={cid} onChange={setCid} options={db.cos.map(c => [c.id, c.name] as [string, string])} all="All companies" /></PageHead>
       <DemoBar />
       {!db.cos.length ? <div className="card"><Empty title="Nothing to analyse" text="Add companies to your watchlist first." /></div> : (
         <div className="grid g21">
-          <Card title="Risk signals" sub={`${all.length} signal${all.length === 1 ? '' : 's'} from a transparent rule engine, ranked by strength`}>
-            {all.length ? <div className="stack soft" key={cid} style={{ gap: 20 }}>{TYPES.flatMap(t => all.filter(i => i.type === t)).map((i, k) => <InsightCard key={k} i={i} withWhy />)}</div> : <Empty title="No signals" text="No pattern rule matched for this selection." />}
+          <Card title="Risk signals" sub="Patterns found across several reports, strongest first">
+            {all.length ? <div className="stack soft" key={cid} style={{ gap: 20 }}>{[...all].sort((a, b) => b.w - a.w).slice(0, more ? all.length : 4).map((i, k) => <InsightCard key={k} i={i} withWhy />)}{all.length > 4 && <div><button className="btn sm" id="moresig" onClick={() => setMore(m => !m)}>{more ? 'Show fewer' : `Show all ${all.length} signals`}</button></div>}</div> : <Empty title="No signals" text="No pattern rule matched for this selection." />}
           </Card>
           <div className="stack">
             <Card title="Risk heatmap" sub="Score by company and pillar">
@@ -42,10 +43,6 @@ export default function Risk() {
                   ...[null, ...P3].map(p => { const v = coScore(db, r.c.id, p); return <span key={r.c.id + (p ?? 'o')} className="c" style={cssVars({ '--c': p ? PC[p] : 'var(--b3)', '--a': Math.round(v * 0.85) })} data-tip={`<b>${esc(r.c.name)}</b><br>${p ? PILLARS[p].name : 'Overall'} score: <b>${v}</b> · ${BANDS[bandIx(v)]}`}>{v}</span>; })
                 ])}
               </div>
-            </Card>
-            <Card title="Comparative insight" sub={`Each company against the watchlist mean of ${cmp[0]?.avg ?? 0}`}>
-              <div className="stack" style={{ gap: 10 }}>{cmp.map(r => <div key={r.c.id} className="row" style={{ justifyContent: 'space-between', fontSize: 13 }}><span><span className="mono dim">#{r.rank}</span> {r.c.name}</span><span className="mono" title="Difference from watchlist mean">{r.s} <span className="dim">({r.d >= 0 ? '+' : ''}{r.d})</span></span></div>)}</div>
-              <p className="dim" style={{ fontSize: 12, marginTop: 12 }}>Rank 1 carries the highest exposure. Difference is the company score minus the watchlist mean.</p>
             </Card>
           </div>
         </div>

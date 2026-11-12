@@ -100,9 +100,9 @@ export function FactorRows({ st }: { st: Story }) {
   );
 }
 export function DemoBar() {
-  const { mode, modeNote } = useStore();
-  if (mode === 'live') return <div className="demobar" style={{ borderStyle: 'solid', background: 'color-mix(in srgb,var(--S) 6%,transparent)' }}><Icon n="check" /><span><b>Live mode.</b> Records come from the connected backend. Records marked AI ANALYSED are articles you submitted.</span></div>;
-  return <div className="demobar"><Icon n="alert" /><span><b>Demo mode.</b> {modeNote} Records marked DEMO are synthetic scenarios, not real events. Company reference details are real.</span></div>;
+  const { mode, db, loading } = useStore();
+  if (mode === 'live') return <div className="demobar live"><Icon n="check" /><span><b>Live data</b> from your backend.{!loading && !db.stories.length ? ' No articles have been collected yet; the collector runs hourly.' : ''}</span></div>;
+  return <div className="demobar"><Icon n="alert" /><span><b>Demo mode.</b> These are sample scenarios, not real events.</span></div>;
 }
 export const PageHead = ({ title, sub, children }: { title: string; sub: string; children?: ReactNode }) => (
   <div className="ph"><div><h1>{title}</h1><p>{sub}</p></div><div className="acts">{children}</div></div>

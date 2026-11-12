@@ -19,7 +19,7 @@ export default function Analytics() {
   const exp = (fn: () => void, what: string) => () => { fn(); toast(`${what} exported as CSV`); };
   return (
     <>
-      <PageHead title="Analytics & Reports" sub="Cross-cutting views of the watchlist over the last 90 days, with dataset exports.">
+      <PageHead title="Analytics & Reports" sub="The last 90 days across your watchlist. Hover any chart for exact figures.">
         <button className="btn" onClick={exp(() => exportIncidents(db), 'Incidents')}><Icon n="down" />Incidents CSV</button>
         <button className="btn" onClick={exp(() => exportArticles(db), 'Articles')}><Icon n="down" />Articles CSV</button>
         <button className="btn" onClick={exp(() => exportScores(db), 'Scores')}><Icon n="down" />Scores CSV</button>
@@ -35,15 +35,11 @@ export default function Analytics() {
             <HBars max={300} rows={db.cos.map(c => ({ label: c.name, onClick: () => open({ kind: 'company', id: c.id }), value: coScore(db, c.id), segs: P3.map(p => ({ name: PILLARS[p].name, color: PC[p], value: coScore(db, c.id, p) })), tipExtra: `Overall: <b>${coScore(db, c.id)}</b>` })).sort((a, b) => b.value - a.value)} />
             <div style={{ marginTop: 10 }}><PillarLegend /><p className="dim" style={{ fontSize: 12, marginTop: 6 }}>The number at the right is the overall score.</p></div>
           </Card>
-          <Card title="Industry-wise risk distribution" sub="Mean overall score by industry"><HBars rows={inds} max={100} /></Card>
-          <Card title="E / S / G category comparison" sub="Active incidents and pillar score">
-            <div className="kpis three" style={{ margin: 0 }}>{P3.map(p => { const l = act.filter(i => i.pillar === p); return <div key={p} className="kpi" style={{ padding: 0 }}><div className="k"><i style={cssVars({ '--c': PC[p] })} />{PILLARS[p].name}</div><div className="v">{portScore(db, p)}</div><div className="d">{l.length} active · mean severity {mean(l.map(i => i.sev))}</div><div className="meter"><i style={cssVars({ '--c': PC[p], '--w': portScore(db, p) + '%' })} /></div></div>; })}</div>
+          <Card title="Severity breakdown" sub="Active incidents per pillar, by severity band">
+            <StackedBars labels={P3.map(p => PILLARS[p].name)} stacks={BANDS.map((b, j) => ({ name: b, color: BC[j], values: P3.map(p => act.filter(i => i.pillar === p && bandIx(i.sev) === j).length) }))} /><div style={{ marginTop: 10 }}><Legend items={BANDS.map((b, j) => ({ name: b, color: BC[j] }))} /></div>
           </Card>
-          <Card title="Incident frequency" sub="Reports per week by pillar">
+          <Card title="Weekly activity" sub="Reports per week by pillar">
             <StackedBars labels={wl} tipLabels={tl} stacks={P3.map(p => ({ name: PILLARS[p].name, color: PC[p], values: wk.map(w => inW(w, s => s.pillar === p)) }))} /><div style={{ marginTop: 10 }}><PillarLegend /></div>
-          </Card>
-          <Card title="Severity trend" sub="Reports per week by severity band">
-            <StackedBars labels={wl} tipLabels={tl} stacks={BANDS.map((b, j) => ({ name: b, color: BC[j], values: wk.map(w => inW(w, s => bandIx(s.severity) === j)) }))} /><div style={{ marginTop: 10 }}><Legend items={BANDS.map((b, j) => ({ name: b, color: BC[j] }))} /></div>
           </Card>
           <Card title="Risk concentration" sub="Subcategories with the most active incidents">{conc.length ? <HBars rows={conc} /> : <Empty title="No active incidents" text="" />}</Card>
           <Card title="Resolved versus unresolved" sub={`${db.incs.length} incidents on record`}>

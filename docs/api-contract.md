@@ -87,6 +87,8 @@ Request `{ "facts": { … } }` with the digest figures. Response `{ "text": "Exe
 
 ## GET /workspace and PUT /workspace
 
+Every request carries an `X-Workspace-Id` header: a random UUID the browser generates once. The reference backend stores one workspace per id. It identifies a browser, it does not authenticate a person.
+
 Loads and saves the signed-in user's workspace: the `Workspace` type in `src/lib/types.ts` (theme, watchlist, incident overrides with notes and statuses, submitted articles, RSS feeds, preferences). `GET` returns `404` when the user has none yet.
 
 ## Suggested tables

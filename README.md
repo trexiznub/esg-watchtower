@@ -82,6 +82,10 @@ At start-up the app calls `GET /health` on the configured backend.
 
 If a live request fails, the app falls back to demo mode and says so on screen. Company reference details (name, ticker, industry, headquarters) are real in both modes; demo incidents are not real events.
 
+## Backend
+
+A ready-to-deploy Supabase backend is in [`backend/`](backend/README.md): database schema, an hourly news collector (GDELT + RSS) with Claude classification, and the API this site calls. It is separate from the Pages build and deployed with the Supabase CLI. Follow `backend/README.md`, then set `VITE_API_BASE_URL`.
+
 ## API service layer
 
 `src/services/api.ts` defines one interface, `ApiProvider`, with two implementations:
@@ -89,12 +93,13 @@ If a live request fails, the app falls back to demo mode and says so on screen. 
 - `remoteProvider` calls your backend with `fetch`, a timeout and input validation. Backend records are treated as untrusted: malformed ones are dropped and severity is recomputed locally.
 - `demoProvider` serves the same interface with no network access.
 
-The JSON shapes the backend must return are in [`docs/api-contract.md`](docs/api-contract.md). The backend is a separate project (for example Supabase Edge Functions, Cloudflare Workers or a small Node service). It must allow CORS for your Pages origin, authenticate users, and keep all keys server-side.
+The JSON shapes the backend must return are in [`docs/api-contract.md`](docs/api-contract.md). The reference implementation is in `backend/`; any service that returns the same shapes works. It must allow CORS for your Pages origin, authenticate users, and keep all keys server-side.
 
 ## Project structure
 
 ```
 .github/workflows/deploy.yml   GitHub Pages deployment
+backend/                       Supabase schema and Edge Functions (deployed separately)
 docs/api-contract.md           Backend endpoints and JSON shapes
 index.html                     Vite entry
 vite.config.ts                 Base path logic

@@ -15,6 +15,14 @@ export const config = {
 export const backendConfigured = !!config.apiBaseUrl && !config.forceDemo;
 
 export const WORKSPACE_KEY = 'esgwt.react.v1';
+/** Random id that names this browser's workspace on the backend. It is not a credential. */
+export function workspaceId(): string {
+  try {
+    let id = localStorage.getItem('esgwt.wsid');
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem('esgwt.wsid', id); }
+    return id;
+  } catch { return 'anonymous'; }
+}
 
 export interface ApiProvider {
   kind: 'demo' | 'remote';
@@ -42,7 +50,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   try {
     const res = await fetch(config.apiBaseUrl + path, {
       ...init, signal: ctl.signal, credentials: config.withCredentials ? 'include' : 'omit',
-      headers: { Accept: 'application/json', ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...(init.headers ?? {}) }
+      headers: { Accept: 'application/json', 'X-Workspace-Id': workspaceId(), ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...(init.headers ?? {}) }
     });
     if (!res.ok) throw new ApiError(`The server answered ${res.status} for ${path}.`, res.status);
     return (res.status === 204 ? null : await res.json()) as T;

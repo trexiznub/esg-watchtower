@@ -76,7 +76,7 @@ export default function Digest() {
             <div className="stack" style={{ gap: 10 }}>
               <span className={`status ${mode === 'live' ? 'ok' : 'warn'}`}><i />Backend · {mode === 'live' ? 'connected' : 'not connected'}</span>
               <p className="muted" style={{ fontSize: 12.5 }}>This page generates the report on demand and sends nothing itself. Scheduling and email are backend jobs: with those configured, the next {P.digestFreq.toLowerCase()} run would fall on <b>{next}</b>.</p>
-              <div><Link className="btn sm" to="/settings" state={{ tab: 'architecture' }}>See what the backend needs</Link></div>
+              <div><Link className="btn sm" to="/settings" state={{ tab: 'providers' }}>Backend settings</Link></div>
             </div>
           </div>
         </div>

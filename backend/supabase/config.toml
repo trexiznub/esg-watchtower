@@ -1,0 +1,8 @@
+# Both functions do their own access checks, so Supabase's JWT gate is off:
+#   api      public read/classify API for the static site (CORS + rate limit)
+#   collect  scheduled job, requires the x-cron-secret header
+[functions.api]
+verify_jwt = false
+
+[functions.collect]
+verify_jwt = false
